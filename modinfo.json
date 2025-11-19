@@ -1,0 +1,14 @@
+{
+  "$schema": "https://moddbcdn.vintagestory.at/schema/modinfo.latest.json",
+  "authors": [
+    "spiker51"
+  ],
+  "dependencies": {
+    "game": "1.21.0"
+  },
+  "description": "A simple voice chat mod that adds VOIP capabilities to the game.",
+  "modid": "basicvoicechat",
+  "name": "Basic Voice Chat",
+  "type": "Code",
+  "version": "1.0.0"
+}
