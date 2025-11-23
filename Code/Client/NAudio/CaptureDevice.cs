@@ -1,4 +1,5 @@
 ﻿using Basic_Voice_Chat.Code.Server;
+using Basic_Voice_Chat.Code.Utility;
 using NAudio.Wave;
 using System;
 using Vintagestory.API.Client;
@@ -10,19 +11,19 @@ namespace Basic_Voice_Chat.Code.Client.NAudio
     {
         private readonly ICoreClientAPI _capi;
         private readonly WaveInEvent _waveIn;
+        private readonly WaveFormat _captureFormat;
         private bool _isRecording;
-
-        private static readonly WaveFormat CaptureFormat = new();
 
         public CaptureDevice(ICoreClientAPI capi)
         {
             _capi = capi;
+            _captureFormat = new(44100, 16, 1);
             _isRecording = false;
 
             _waveIn = new WaveInEvent
             {
                 DeviceNumber = 0,
-                WaveFormat = CaptureFormat,
+                WaveFormat = _captureFormat,
                 BufferMilliseconds = 40
             };
 
@@ -52,7 +53,9 @@ namespace Basic_Voice_Chat.Code.Client.NAudio
             Buffer.BlockCopy(e.Buffer, 0, buffer, 0, e.BytesRecorded);
 
             Vec3d soundOrigin = _capi.World.Player.Entity.Pos.XYZ;
-            AudioData audioData = new(buffer, soundOrigin);
+            soundOrigin.Y += 2;
+
+            VoiceChatAudioData audioData = new(buffer, soundOrigin);
 
             _capi.Network
                 .GetChannel("basicvoicechat:network-channel")
@@ -61,7 +64,7 @@ namespace Basic_Voice_Chat.Code.Client.NAudio
 
         public void Dispose()
         {
-            _waveIn?.Dispose();
+            _waveIn.Dispose();
         }
     }
 }

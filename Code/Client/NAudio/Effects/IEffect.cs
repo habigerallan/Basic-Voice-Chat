@@ -1,4 +1,5 @@
 ﻿using Basic_Voice_Chat.Code.Server;
+using Basic_Voice_Chat.Code.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,6 @@ namespace Basic_Voice_Chat.Code.Client.NAudio.Effects
     {
         protected readonly ICoreClientAPI _capi = capi;
 
-        public abstract AudioData Apply(AudioData audioData);
+        public abstract void Apply(ref VoiceChatAudioData audioData);
     }
 }

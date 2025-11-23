@@ -8,16 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Code\Client\NAudio\Effects\**" />
-    <EmbeddedResource Remove="Code\Client\NAudio\Effects\**" />
-    <None Remove="Code\Client\NAudio\Effects\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Code\Client\NAudio\EffectChain.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="VintagestoryAPI">
       <HintPath>$(VINTAGE_STORY)/VintagestoryAPI.dll</HintPath>
       <Private>false</Private>

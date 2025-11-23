@@ -1,6 +1,7 @@
 ﻿using Basic_Voice_Chat.Code.Client;
 using Basic_Voice_Chat.Code.Config;
 using Basic_Voice_Chat.Code.Server;
+using Basic_Voice_Chat.Code.Utility;
 using System;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -36,7 +37,7 @@ namespace Basic_Voice_Chat.Code
             TryToLoadConfig(api);
 
             api.Network.RegisterChannel("basicvoicechat:network-channel")
-                .RegisterMessageType<AudioData>();
+                .RegisterMessageType<VoiceChatAudioData>();
         }
 
         public override void StartServerSide(ICoreServerAPI api)
@@ -66,7 +67,6 @@ namespace Basic_Voice_Chat.Code
         public override void Dispose()
         {
             base.Dispose();
-
             clientManager?.Dispose();
         }
     }

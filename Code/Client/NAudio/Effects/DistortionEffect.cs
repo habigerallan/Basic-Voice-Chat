@@ -5,7 +5,7 @@ using Vintagestory.API.Client;
 
 namespace Basic_Voice_Chat.Code.Client.NAudio.Effects
 {
-    internal class MuffleEffect(ICoreClientAPI capi) : IEffect(capi)
+    internal class DistortionEffect(ICoreClientAPI capi) : IEffect(capi)
     {
         public override void Apply(ref VoiceChatAudioData audioData)
         {

@@ -1,7 +1,6 @@
 ﻿using Basic_Voice_Chat.Code.Client.NAudio;
 using Basic_Voice_Chat.Code.Config;
-using Basic_Voice_Chat.Code.Server;
-using System;
+using Basic_Voice_Chat.Code.Utility;
 using Vintagestory.API.Client;
 
 namespace Basic_Voice_Chat.Code.Client
@@ -13,7 +12,7 @@ namespace Basic_Voice_Chat.Code.Client
         private readonly CaptureDevice _captureDevice;
         private readonly PlaybackDevice _playbackDevice;
 
-        private GlKeys _currentKeybind;
+        private GlKeys _currentPushToTalkKey;
 
         public ClientManager(ICoreClientAPI api, BasicVoiceChatConfig config)
         {
@@ -24,16 +23,15 @@ namespace Basic_Voice_Chat.Code.Client
             _playbackDevice = new(_capi);
 
             _capi.Network.GetChannel("basicvoicechat:network-channel")
-                .SetMessageHandler<AudioData>(OnPlayerTalked);
+                .SetMessageHandler<VoiceChatAudioData>(OnPlayerTalked);
 
-            _currentKeybind = _config.PushToTalkKey;
+            _currentPushToTalkKey = _config.PushToTalkKey;
 
-            _capi.Input.RegisterHotKey("basicvoicechat:hotkey-push-to-talk", "Push-to-talk", _currentKeybind);
+            _capi.Input.RegisterHotKey("basicvoicechat:hotkey-push-to-talk", "Push-to-talk", _currentPushToTalkKey);
             _capi.Input.SetHotKeyHandler("basicvoicechat:hotkey-push-to-talk", OnHotKeyDown);
 
             _capi.Event.KeyDown += OnKeyDown;
             _capi.Event.KeyUp += OnKeyUp;
-
         }
         private void OnKeyDown(KeyEvent keyEvent)
         {
@@ -47,7 +45,7 @@ namespace Basic_Voice_Chat.Code.Client
                 return;
             }
 
-            if (keyEvent.KeyCode == ((int)_currentKeybind))
+            if (keyEvent.KeyCode == ((int)_currentPushToTalkKey))
             {
                 if (!_captureDevice.IsRecording())
                 {
@@ -59,7 +57,7 @@ namespace Basic_Voice_Chat.Code.Client
         private void OnKeyUp(KeyEvent keyEvent)
         {
 
-            if (_config?.VoiceChatEnabled == false)
+            if (_config.VoiceChatEnabled == false)
             {
                 if (_captureDevice.IsRecording())
                 {
@@ -69,7 +67,7 @@ namespace Basic_Voice_Chat.Code.Client
                 return;
             }
 
-            if (keyEvent.KeyCode == ((int)_currentKeybind))
+            if (keyEvent.KeyCode == ((int)_currentPushToTalkKey))
             {
                 if (_captureDevice.IsRecording())
                 {
@@ -80,29 +78,29 @@ namespace Basic_Voice_Chat.Code.Client
 
         private bool OnHotKeyDown(KeyCombination keyCombination)
         {
-            if (keyCombination.KeyCode != (int)_currentKeybind)
+            if (keyCombination.KeyCode != (int)_currentPushToTalkKey)
             {
-                _currentKeybind = (GlKeys)keyCombination.KeyCode;
-                _config.PushToTalkKey = _currentKeybind;
+                _currentPushToTalkKey = (GlKeys)keyCombination.KeyCode;
+                _config.PushToTalkKey = _currentPushToTalkKey;
             }
 
             return true;
         }
 
-        private void OnPlayerTalked(AudioData audioData)
+        private void OnPlayerTalked(VoiceChatAudioData audioData)
         {
-            if (_config?.VoiceChatEnabled == false)
+            if (_config.VoiceChatEnabled == false)
             {
                 return;
             }
 
-            _playbackDevice.PlaybackAudio(audioData);
+            _playbackDevice.PlaybackAudio(ref audioData);
         }
 
         public void Dispose()
         {
-            _captureDevice?.Dispose();
-            _playbackDevice?.Dispose();
+            _captureDevice.Dispose();
+            _playbackDevice.Dispose();
         }
     }
 }

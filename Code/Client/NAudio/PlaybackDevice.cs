@@ -1,9 +1,12 @@
 ﻿using Basic_Voice_Chat.Code.Server;
+using Basic_Voice_Chat.Code.Utility;
+using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using System;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
+using Vintagestory.Common;
 
 namespace Basic_Voice_Chat.Code.Client.NAudio
 {
@@ -12,40 +15,44 @@ namespace Basic_Voice_Chat.Code.Client.NAudio
         private readonly ICoreClientAPI _capi;
         private readonly WaveOutEvent _waveOut;
         private readonly BufferedWaveProvider _bufferedProvider;
-        //private readonly EffectChain _effectChain;
+        private readonly EffectChain _effectChain;
+        private readonly WaveFormat _playbackFormat;
 
-        private static readonly WaveFormat PlaybackFormat = new();
+        private int _numberOfChannels;
 
         public PlaybackDevice(ICoreClientAPI capi)
         {
             _capi = capi;
 
-            //_effectChain = new EffectChain(_capi);
-            _bufferedProvider = new BufferedWaveProvider(PlaybackFormat);
+            MMDeviceEnumerator enumerator = new();
+            MMDevice defaultDevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+
+            _numberOfChannels = defaultDevice.AudioClient.MixFormat.Channels;
+            _playbackFormat = new(44100, 16, _numberOfChannels);
+
+            _effectChain = new EffectChain(_capi);
+
+            _bufferedProvider = new BufferedWaveProvider(_playbackFormat);
 
             _waveOut = new WaveOutEvent();
             _waveOut.Init(_bufferedProvider);
         }
 
-        public void PlaybackAudio(AudioData audioData)
+        public void PlaybackAudio(ref VoiceChatAudioData audioData)
         {
             if (audioData.Buffer.Length == 0)
             {
                 return;
             }
 
-            Vec3d playerLocation = _capi.World.Player.Entity.Pos.XYZ;
+            audioData.NumberOfChannels = _numberOfChannels;
+            _effectChain.ApplyEffects(ref audioData);
 
-            double distance = (audioData.Origin - playerLocation).Length();
-
-            if (distance > 50.0)
+            if (audioData.Buffer.Length == 0)
             {
                 return;
             }
 
-            _waveOut.Volume = (float)Math.Pow((50.0 - distance) / 50.0, 2);
-
-            //audioBytes = _effectChain.ApplyEffects(audioBytes);
             _bufferedProvider.AddSamples(audioData.Buffer, 0, audioData.Buffer.Length);
 
             if (_waveOut.PlaybackState != PlaybackState.Playing)
@@ -56,8 +63,8 @@ namespace Basic_Voice_Chat.Code.Client.NAudio
 
         public void Dispose()
         {
-            _waveOut?.Stop();
-            _waveOut?.Dispose();
+            _waveOut.Stop();
+            _waveOut.Dispose();
         }
     }
 }
