@@ -13,6 +13,22 @@ namespace Basic_Voice_Chat.Code.Client.NAudio.Effects
     {
         protected readonly ICoreClientAPI _capi = capi;
 
+        protected static short Clamp16(double value)
+        {
+            return (short)Math.Clamp(value, short.MinValue, short.MaxValue);
+        }
+
+        protected static short ReadSample16(byte[] buffer, int index)
+        {
+            return (short)(buffer[index] | (buffer[index + 1] << 8));
+        }
+
+        protected static void WriteSample16(byte[] buffer, int index, short value)
+        {
+            buffer[index] = (byte)(value & 0xFF);
+            buffer[index + 1] = (byte)((value >> 8) & 0xFF);
+        }
+
         public abstract void Apply(ref VoiceChatAudioData audioData);
     }
 }

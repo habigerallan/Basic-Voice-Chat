@@ -21,21 +21,15 @@ namespace Basic_Voice_Chat.Code.Client.NAudio.Effects
                 return;
             }
 
-            float volume = (float)Math.Pow((50.0 - distance) / 50.0, 2);
+            double volumePercent = Math.Pow((50.0 - distance) / 50.0, 2);
 
             for (int i = 0; i < audioData.Buffer.Length; i += 2)
             {
-                short sample = (short)(audioData.Buffer[i] | (audioData.Buffer[i + 1] << 8));
+                short monoSample = ReadSample16(audioData.Buffer, i);
 
-                int scaled = (int)(sample * volume);
+                short scaledShort = Clamp16(monoSample * volumePercent);
 
-                if (scaled > short.MaxValue) scaled = short.MaxValue;
-                else if (scaled < short.MinValue) scaled = short.MinValue;
-
-                short outSample = (short)scaled;
-
-                audioData.Buffer[i] = (byte)(outSample & 0xFF);
-                audioData.Buffer[i + 1] = (byte)((outSample >> 8) & 0xFF);
+                WriteSample16(audioData.Buffer, i, scaledShort);
             }
         }
     }
