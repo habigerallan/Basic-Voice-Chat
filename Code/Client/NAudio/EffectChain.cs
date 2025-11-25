@@ -17,8 +17,9 @@ namespace Basic_Voice_Chat.Code.Client.NAudio
             _capi = capi;
             effects = [];
 
+            //effects.Add(new GainEffect(_capi));
             effects.Add(new AttenuationEffect(_capi));
-            effects.Add(new MuffleEffect(_capi));
+            //effects.Add(new MuffleEffect(_capi));
             //effects.Add(new ReverbEffect(_capi));
             //effects.Add(new DistortionEffect(_capi));
             effects.Add(new SpatialEffect(_capi));

@@ -15,7 +15,8 @@ namespace Basic_Voice_Chat.Code.Client.NAudio.Effects
 
         protected static short Clamp16(double value)
         {
-            return (short)Math.Clamp(value, short.MinValue, short.MaxValue);
+            double clamped = Math.Clamp(value, short.MinValue, short.MaxValue);
+            return (short)Math.Round(clamped);
         }
 
         protected static short ReadSample16(byte[] buffer, int index)

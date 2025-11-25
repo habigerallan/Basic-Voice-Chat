@@ -17,23 +17,28 @@ namespace Basic_Voice_Chat.Code.Client.NAudio.Effects
             playerLocation.Y += 2;
             playerLocation = new(512000, 4, 512000);
 
-            Vec3d direction = (audioData.Origin - playerLocation).Normalize();
+            Vec3d soundDirection = (playerLocation - audioData.Origin).Normalize();
             float playerYaw = _capi.World.Player.Entity.BodyYaw;
 
-            double cos = Math.Cos(-playerYaw);
-            double sin = Math.Sin(-playerYaw);
+            double playerXDirection = Math.Sin(playerYaw);
+            double playerYDirection = Math.Sin(_capi.World.Player.CameraPitch);
+            double playerZDirection = Math.Cos(playerYaw);
 
-            double localX = direction.X * cos - direction.Z * sin;
-            double localZ = direction.X * sin + direction.Z * cos;
+            Vec3d playerFacingDirection = new(playerXDirection, playerYDirection, playerZDirection);
 
-            localX = Math.Max(-1.0, Math.Min(1.0, localX));
-            localZ = Math.Max(-1.0, Math.Min(1.0, localZ));
+            double horizontalDifference = playerFacingDirection.X * soundDirection.Z - playerFacingDirection.Z * soundDirection.X;
+            horizontalDifference = GameMath.Clamp(horizontalDifference, -1, 1);
 
-            double left = (1 - localX) * 0.5;
-            double right = (1 + localX) * 0.5;
+            double right = (horizontalDifference + 1.0) * 0.5;
+            double left = 1.0 - right;
 
-            double forward = (1.0 + localZ) * 0.5;
-            double backward = (1.0 - localZ) * 0.5;
+            double depthDifference = soundDirection.X * playerFacingDirection.X + soundDirection.Z * playerFacingDirection.Z;
+            depthDifference = GameMath.Clamp(depthDifference, -1, 1);
+
+            double forward = (depthDifference + 1.0) * 0.5;
+            double backward = 1.0 - forward;
+
+            _capi.Logger.Debug($"\nLeft: {left}\nRight {right}\nForward: {forward}\nBackward {backward}");
 
             // 2.0 | L, R
             if (audioData.NumberOfChannels == 2)

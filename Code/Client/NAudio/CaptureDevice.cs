@@ -24,12 +24,13 @@ namespace Basic_Voice_Chat.Code.Client.NAudio
             {
                 DeviceNumber = 0,
                 WaveFormat = _captureFormat,
-                BufferMilliseconds = 40
+                BufferMilliseconds = 100
             };
 
             _waveIn.DataAvailable += OnDataAvailable;
         }
 
+        // Freeze at beginning here
         public void StartRecording()
         {
             _isRecording = true;
